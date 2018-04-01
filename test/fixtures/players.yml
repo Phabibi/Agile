@@ -1,0 +1,14 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+admin_user:
+  first_name: Parsa
+  last_name: Habibi
+  email: phabibi@sfu.com
+  password_digest: <%= BCrypt::Password.create('adminpass') %>
+  Admin: 'trues'
+
+regular_player:
+  first_name: normal
+  last_name: user
+  email: normal@gmail.com
+  password_digest: <%= BCrypt::Password.create('adminpass') %>
+  Admin: 'false'

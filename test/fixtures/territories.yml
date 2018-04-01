@@ -1,0 +1,17 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  coords: MyString
+  time: MyString
+  area: MyString
+  center_lng: 1.5
+  center_lat: 1.5
+  player_id: 1
+
+two:
+  coords: MyString
+  time: MyString
+  area: MyString
+  center_lng: 1.5
+  center_lat: 1.5
+  player_id: 1

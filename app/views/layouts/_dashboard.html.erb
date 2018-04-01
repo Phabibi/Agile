@@ -1,0 +1,13 @@
+<div id="dashboard" style="display: none;">
+    <button id="dashboard-exit" class="btn waves-effect waves-light" data-activates="dashboard-exit">
+      <i class="material-icons">close</i>
+    </button>
+    <h1 class="dashboard-content"><%=@player.username%></h1>
+    <h4 class="dashboard-content"> Score: <%=@player.score%></h4>
+    <h4 class="dashboard-content"> Ranking: </br>
+      <h5 class="dashboard-content">    Globally: <%=@player.rank%> </br>
+      <h5 class="dashboard-content">    Nationally: <%=@player.rank%></br>
+      <h5 class="dashboard-content">    Locally: <%=@player.rank%></br>
+    </h4>
+    <h4 class="dashboard-content"> Last Territory Update at: <%=@player.updated_at.to_formatted_s(:short) %></h4>
+</div>

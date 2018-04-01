@@ -1,0 +1,290 @@
+/*home*/
+.home-container{
+  position: relative;
+  display: grid;
+  grid-template-columns: 5fr 3fr 150px 3fr 5fr;
+  grid-template-rows: 70px 10px 0.5fr 15fr 0.5fr 10px;
+  height: 100vh;
+  width: 100%;
+}
+
+.form-tabs ul {
+  border: none !important;
+  border-radius: 0;
+}
+
+.log-sign-btn-cont{
+  grid-column: 3 / 4;
+  grid-row: 1 / 2;
+  z-index: 5;
+  margin-top: -100px;
+}
+.log-sign-btn-cont a {
+  width: 50%;
+  line-height: 70px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: bold;
+  padding:0 10px 0 10px;
+  color: white;
+  transition: all 0.3s
+}
+.log-sign-btn-cont a:hover{
+  color: #3d322a;
+  background: #fff;
+}
+.login-btn{
+  float: left;
+  border-right: 1px solid rgba(256,256,256,0.2);
+}
+.register-btn {
+  float: right;
+}
+
+#homepage-map{
+  background-image: image-url("earth-run.gif");
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+
+.forms-container{
+  grid-column: 2 / 5;
+  grid-row: 4 / 5;
+  position: absolute;
+  background: #ebebeb;
+  height:100%;
+  min-height: 600px;
+  max-height: 700px;
+  width:100%;
+  visibility:hidden;
+}
+
+.form-tabs ul{
+  overflow: hidden;
+  height: 80px;
+}
+
+.form-tabs .tabs{
+  background-color: #3d322a !important;
+}
+
+.form-tabs ul li{
+  height: 100% !important;
+  line-height: 80px !important;
+}
+
+.tabs .indicator {
+  background-color: #e0f2f1;
+  height: 80px;
+  opacity: 0.3;
+}
+
+.form-blocks {
+  height: 86%;
+  margin:0;
+  font-size:30px;
+}
+
+.form-content {
+  padding: 10px 20px 0 20px;
+}
+
+.confirmation-tabs-btn {
+  position: absolute;
+}
+
+#register-block {
+  display:none;
+}
+
+.form-submit {
+  height: 70px;
+  padding: 0 50px 0 50px;
+  font-size: 30px;
+  line-height: 70px;
+  background: #3d322a !important;
+}
+
+.forms-exit{
+  padding: 0;
+  background-color: transparent;
+  color: #1e1915;
+}
+.forms-exit:hover, .forms-exit:focus{
+  background-color: transparent;
+}
+
+/* label focus color */
+.form-content .input-field input[type=text]:focus + label {
+  color: #3d322a !important;
+}
+.form-content .input-field input[type=email]:focus + label {
+  color: #3d322a !important;
+}
+.form-content .input-field input[type=password]:focus + label {
+  color: #3d322a !important;
+}
+/* label underline focus color */
+.form-content .input-field input[type=text]:focus {
+  border-bottom: 1px solid #3d322a !important;
+  box-shadow: 0 1px 0 0 #3d322a !important;
+}
+.form-content .input-field input[type=email]:focus {
+  border-bottom: 1px solid #3d322a !important;
+  box-shadow: 0 1px 0 0 #3d322a !important;
+}
+.form-content .input-field input[type=password]:focus {
+  border-bottom: 1px solid #3d322a !important;
+  box-shadow: 0 1px 0 0 #3d322a !important;
+}
+
+@media (max-aspect-ratio: 7/6) {
+
+  /*Adjust forms-container width to cover screen on portrait screens*/
+  .home-container{
+    grid-template-columns: 1fr 10fr 150px 10fr 1fr;
+  }
+
+  /*Header exits and side_nav slides in*/
+  .nav-wrapper li {
+    transform: translateX(600%);
+  }
+
+  #sidenav-trigger{
+    transform: translateX(0);
+  }
+
+}
+
+@media (min-height: 527px) {
+
+  /* Adjust forms-container's height from streching forever.*/
+  .home-container{
+    grid-template-rows: 70px 10px 0.5fr 700px 0.5fr 10px;
+  }
+
+}
+
+/*about*/
+#about-page, #help-page{
+  background: white;
+}
+.static-content{
+  grid-row:2 / -1;
+  grid-column: 1 / -1;
+  padding: 20px;
+}
+#more-about {
+  background-color: #555;
+}
+/*logo*/
+
+#logo-container{
+  width:100%;
+  height:100%;
+  position:fixed;
+  z-index: 20;
+  background: linear-gradient(-45deg, #EE7752, #E73C7E, #23A6D5, #23D5AB);
+	background-size: 400% 400%;
+	-webkit-animation: Gradient 15s ease infinite;
+	-moz-animation: Gradient 15s ease infinite;
+	animation: Gradient 15s ease infinite;
+}
+
+#logo-content{
+  width: 400px; height: 400px;
+  transform: scale(0);
+  position: absolute;
+  top:0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin:auto;
+  animation: heartbeat 1.5s 3s infinite;
+}
+
+#logo{
+  background-image: image-url("Agile.png");
+  width: 350px;
+  height: 288px;
+}
+
+.logo-exit{
+  background: transparent;
+  transform: translateY(-110%);
+  animation:1s logo-exit-emph infinite;
+}
+
+.logo-exit:hover, .logo-exit:focus{
+  background: transparent;
+}
+
+
+/*Background gradient animation (Source: https://codepen.io/P1N2O/pen/pyBNzX)*/
+
+@-webkit-keyframes Gradient {
+	0% {
+		background-position: 0% 50%
+	}
+	50% {
+		background-position: 100% 50%
+	}
+	100% {
+		background-position: 0% 50%
+	}
+}
+
+@-moz-keyframes Gradient {
+	0% {
+		background-position: 0% 50%
+	}
+	50% {
+		background-position: 100% 50%
+	}
+	100% {
+		background-position: 0% 50%
+	}
+}
+
+@keyframes Gradient {
+	0% {
+		background-position: 0% 50%
+	}
+	50% {
+		background-position: 100% 50%
+	}
+	100% {
+		background-position: 0% 50%
+	}
+}
+
+/*Heart animation beat for logo*/
+@keyframes heartbeat {
+  0% {
+    transform: scale(1);
+  }
+  10% {
+    transform: scale(1.05);
+  }
+  20% {
+    transform: scale(1.03);
+  }
+  30% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes logo-exit-emph {
+
+  0% {
+    color: rgba(0,0,0, 0.8);
+  }
+
+  100% {
+    color: rgba(0,0,0, 0.2);
+  }
+
+}

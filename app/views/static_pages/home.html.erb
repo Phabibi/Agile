@@ -1,0 +1,129 @@
+
+<div id="logo-container" style="opacity:1">
+  <center>
+    <div id="logo-content">
+      <div id="logo"></div>
+      <h4 id="tagline"> Run For Your Kingdom </h4>
+    </div>
+    <button class="logo-exit waves-effect btn" data-activates="logo-exit">Click To Continue</button>
+  </center>
+</div>
+<div class="home-container">
+
+  <%= render "layouts/header" %>
+  <%= render "layouts/side_nav" %>
+
+  <% if !@player %>
+  <div class="log-sign-btn-cont">
+    <a class="login-btn waves-effect" href="#login-block" data-activates='forms-container'>
+      Login
+    </a>
+    <a class="register-btn waves-effect" href="#register-block" data-activates='forms-container'>
+      Register
+    </a>
+  </div>
+  <% end %>
+
+  <div id="homepage-map" class="map"></div>
+  <% if logged_in? %>
+    <%= render "layouts/dashboard" %>
+    <%= render "layouts/leaderboard" %>
+  <% end %>
+  <div class="forms-container">
+    <div class="form-tabs row">
+      <div class="col s12" style="padding:0;">
+        <ul class="tabs indigo">
+          <li class="tab col s6">
+            <a id="login-tab" class="white-text" href="#login-block" style="font-size:30px;">login</a>
+          </li>
+          <li class="tab col s6">
+              <a id="register-tab" class="white-text" href="#register-block" style="font-size:30px;">register</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="form-blocks row valign-wrapper">
+      <div id="login-block" class="col s12">
+        <div class="form-content row">
+          <%= form_for(:session, url: login_path, html: {id: "login-form"}) do |f| %>
+          <div class="row">
+            <div class="input-field col s12">
+              <%= f.label :email %>
+              <%= f.email_field :email, class: 'validate black-text', id: 'login-email' %>
+            </div>
+          </div>
+          <div class="row">
+            <div class="input-field col s12">
+              <%= f.label :password %>
+              <%= f.password_field :password, class: 'validate black-text', id: 'login-password' %>
+            </div>
+          </div>
+          <center>
+            <div class="row">
+              <%= f.submit "Log in", class: "form-submit white-text btn waves-effect waves-light" %>
+            </div>
+
+            <div class="row">
+              <a class="blue-grey-text text-darken-4" href="">Forgot Password?</a>
+            </div>
+          </center>
+        <% end %>
+      </div>
+    </div>
+    <div id="register-block" class="col s12">
+      <div class="form-content row">
+        <%= form_for(:player, url: register_path, html: {id: "register-form"}) do |f| %>
+        <div class="row">
+          <div class="input-field col s6">
+            <%= f.label :first_name, 'First Name' %>
+            <%= f.text_field :first_name, class: 'validate black-text' %>
+          </div>
+          <div class="input-field col s6">
+            <%= f.label :last_name, 'Last Name' %>
+            <%= f.text_field :last_name, class: 'validate black-text' %>
+          </div>
+        </div>
+        <div class="row">
+          <div class="input-field col s12">
+            <%= f.label :email %>
+            <%= f.email_field :email , class: 'validate black-text', id: 'register-email' %>
+          </div>
+        </div>
+        <div class="row">
+          <div class="input-field col s12">
+            <%= f.label :username %>
+            <%= f.text_field :username, class: 'validate black-text' %>
+          </div>
+        </div>
+        <div class="row">
+          <div class="input-field col s6">
+            <%= f.label :password %>
+            <%= f.password_field :password, class: 'validate black-text', id: 'register-password' %>
+          </div>
+          <div class="input-field col s6">
+            <%= f.label :password_confirmation %>
+            <%= f.password_field :password_confirmation, class: 'validate black-text' %>
+          </div>
+        </div>
+        <center>
+          <div class="row">
+            <%= f.submit "Register", class: "form-submit white-text waves-effect waves-light" %>
+          </div>
+        </center>
+      <% end %>
+    </div>
+  </div>
+    </div>
+    <center>
+        <button class="forms-exit waves-effect waves-light btn-large" data-activates="forms-exit">
+          <i class="material-icons" style="font-size:70px;">arrow_drop_up_circle</i>
+        </button>
+    </center>
+  </div>
+</div>
+
+<!-- <script>
+TweenMax.staggerFrom("h1", 0.5, { opacity:0, y:0, delay:0.5, ease:Bounce.easeOut},0.2);
+
+</script> -->
+<!--<script id='map-script' src='https://maps.googleapis.com/maps/api/js?key=AIzaSyBabM1G2ohtxRzaaDP4tyDfd9aubA1CXg8&callback=init' async defer></script>-->

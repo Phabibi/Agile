@@ -1,0 +1,10 @@
+development:
+  adapter: async
+
+test:
+  adapter: async
+
+production:
+  adapter: redis
+  url:  redis://redistogo:a92897b2ab4e7049a585687e2c415443@soldierfish.redistogo.com:11967/
+  channel_prefix: Agile_production

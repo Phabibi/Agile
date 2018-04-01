@@ -1,0 +1,33 @@
+<!-- Side bar -->
+<div id = "left-bar">
+
+</div>
+
+    <!-- Slide out nav bar -->
+    <div id="slide-out">
+
+      <h4 style="font-weight: bold; margin-left: 15px;">Leaderboard</h4>
+
+      <% @players = Player.all
+          @players = @players.sort_by { |obj| obj.score }
+          @players = @players.reverse
+          @players.each do |elem|
+      %>
+      <p class='leaderboard-players'> <strong><%= elem.rank %>.</strong> <%= elem.username %> : <%= elem.score %> </p>
+
+      <%end%>
+    </div>
+
+    <!-- Slide down button -->
+    <div id = "slide-down-circle">
+    <div id = "slide-down-arrow">
+    </div>
+    </div>
+
+    <!-- Button to pull out nav -->
+    <div id="click-toggle-circle">
+
+    <div id ="click-toggle-arrow">
+    </div>
+
+</div>

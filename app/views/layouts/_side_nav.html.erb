@@ -1,0 +1,38 @@
+<div id="sidenav-trigger" class="waves-effect waves-light" data-activates="side-nav"><i class="material-icons">menu</i></div>
+
+<nav id="side-nav" style="display:none">
+  <ul>
+    <li class="waves-effect"><%= link_to 'Home', root_path %></li>
+    <li class="waves-effect"><%= link_to 'Help', help_path %></li>
+    <li class="waves-effect"><%= link_to 'About', about_path %></li>
+    <% if @player %>
+      <li class="waves-effect">
+        <a class="dashboard-trigger" data-activates="dashboard">
+          Dashboard
+        </a>
+      </li>
+
+      <!-- Account Dropdown Structure -->
+
+      <li>
+        <a class='account-link dropdown-button' data-activates='sidenav-account-dropdown'>
+          <i class="material-icons left">account_circle</i>Account
+        </a>
+        <ul id='sidenav-account-dropdown' class='dropdown-content'>
+          <li>
+            <a href="#!">Profile</a>
+          </li>
+          <li>
+            <a href="#!">Settings</a>
+          </li>
+          <li class="divider"></li>
+          <li>
+            <%= link_to logout_path, :method => :delete do %>
+              <i class="material-icons left">backspace</i>Logout
+          <% end %>
+        </li>
+      </ul>
+    </li>
+    <% end %>
+  </ul>
+</nav>

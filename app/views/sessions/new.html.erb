@@ -1,0 +1,39 @@
+<div id="form-wrapper" class="valign-wrapper">
+  <div class="container">
+    <h3 id="header" class="white-text">Login</h3>
+    <% if !@login_error.nil? %>
+    <blockquote id="forms-error">
+    <%= @login_error %>
+    </blockquote>
+    <% end %>
+    <div id="forms-container" class="row valign-wrapper">
+      <div id="login" class="col s12">
+        <div class="form-content row">
+          <%= form_for(:session, url: login_path, html: {id: "login-form"}) do |f| %>
+          <div class="row">
+            <div class="input-field col s12">
+              <%= f.label :email %>
+              <%= f.email_field :email, class: 'validate black-text', id: 'login-email' %>
+            </div>
+          </div>
+          <div class="row">
+            <div class="input-field col s12">
+              <%= f.label :password %>
+              <%= f.password_field :password, class: 'validate black-text', id: 'login-password' %>
+            </div>
+          </div>
+          <center>
+            <div class="row">
+              <%= f.submit "Log in", class: "form-submit white-text btn waves-effect waves-light" %>
+            </div>
+
+            <div class="row">
+              <a class="blue-grey-text text-darken-4" href="">Forgot Password?</a>
+            </div>
+          </center>
+        <% end %>
+      </div>
+    </div>
+  </div>
+  </div>
+</div>

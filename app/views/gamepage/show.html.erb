@@ -1,0 +1,34 @@
+<head>
+  <title>Game Page</title>
+</head>
+<div class="gamepage-container">
+  <%= render "layouts/header" %>
+  <%= render "layouts/side_nav" %>
+  <div id="gamepage-map" class="map"></div>
+  <!-- Dashboard -->
+  <% if logged_in? %>
+    <%= render "layouts/dashboard" %>
+    <%= render "layouts/leaderboard" %>
+  <% end %>
+  <div id="capture-UI">Capturing...</div>
+  <button id='score-UI'>..fetching score..</button>
+  <div id='dialog-container'></div>
+  <div id='message-container'>
+    <h1 id='message-title'>Invasion Notification!</h1>
+    <p id='message-body'>one of your territories have been invaded by...</p>
+  </div>
+  <div id='status-container'>Retrieving Location...</div>
+  <div class="start-stop-cont">
+    <button id="start-btn" class="waves-effect btn" onclick="onStartCapture()">start</button>
+    <button id="stop-btn" class="waves-effect btn" onclick="onstopCapture()">stop</button>
+  </div>
+</div>
+
+<script id='map-script' src='https://maps.googleapis.com/maps/api/js?key=AIzaSyBabM1G2ohtxRzaaDP4tyDfd9aubA1CXg8&libraries=geometry&callback=initMap' async defer></script>
+
+<div id='data-container'>
+ <span id='id-container'><%=@player.id%></span>
+ <span id='username-container'><%=@player.username%></span>
+</div>
+<div id='debug'>
+</div>

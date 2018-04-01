@@ -1,0 +1,65 @@
+@import "materialize";
+
+html, body {
+  height: 100%;
+  margin:0;
+  padding: 0;
+  overflow-x:hidden;
+}
+
+body {
+  background: #6f6f6f;
+  position: relative;
+}
+
+h5 {
+  font-weight: 400;
+}
+
+/*Aligns material-icons with button text.
+Make sure to include class 'left' or 'right' for <i> tags.*/
+.btn > i {
+  vertical-align: middle !important;
+  line-height: inherit !important;
+}
+
+/*Applies to /home and /gamepage.*/
+.map {
+  grid-column: 1 / -1;
+  grid-row: 3 / -1;
+}
+
+/*error display on forms*/
+#forms-error {
+  border-color: #EE6E35;
+  color: #000 !important;
+  margin: 0 0 20px 0
+}
+#forms-error ul {
+  margin: 0;
+}
+
+/*players/new*/
+.field_with_errors {
+  display: inline;
+}
+
+.container{
+  background: #ebebeb;
+}
+.container #header {
+  margin: 0 0 10px 0;
+  padding: 15px;
+  text-align: center;
+  background: #3d322a;
+}
+
+#error_explanation {
+  border: 5px solid #1a237e;
+  padding: 20px;
+  width: 450px;
+}
+
+#form-wrapper{
+  height: 100%;
+}

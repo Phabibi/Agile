@@ -1,0 +1,62 @@
+<div id="form-wrapper" class="valign-wrapper">
+<div class="container">
+  <h3 id="header" class="white-text">Register</h3>
+  <% if @player.errors.any? %>
+    <blockquote id="forms-error">
+      <Strong>
+        Please correct the following <%= "error".pluralize(@player.errors.count)%>:
+      </strong>
+      <ul>
+        <% @player.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </blockquote>
+  <% end %>
+  <div id="forms-container" class="row valign-wrapper">
+    <div id="register" class="col s12">
+      <div class="row form-content">
+        <%= form_for(:player, url: register_path, html: {id: "register-form"}) do |f| %>
+        <div class="row">
+          <div class="input-field col s6">
+            <%= f.label :first_name, 'First Name' %>
+            <%= f.text_field :first_name, class: 'validate black-text' %>
+          </div>
+          <div class="input-field col s6">
+            <%= f.label :last_name, 'Last Name' %>
+            <%= f.text_field :last_name, class: 'validate black-text' %>
+          </div>
+        </div>
+        <div class="row">
+          <div class="input-field col s12">
+            <%= f.label :email %>
+            <%= f.email_field :email , class: 'validate black-text', id: 'register-email' %>
+          </div>
+        </div>
+        <div class="row">
+          <div class="input-field col s12">
+            <%= f.label :username %>
+            <%= f.text_field :username, class: 'validate black-text' %>
+          </div>
+        </div>
+        <div class="row">
+          <div class="input-field col s6">
+            <%= f.label :password %>
+            <%= f.password_field :password, class: 'validate black-text', id: 'register-password' %>
+          </div>
+          <div class="input-field col s6">
+            <%= f.label :password_confirmation %>
+            <%= f.password_field :password_confirmation, class: 'validate white-text' %>
+          </div>
+        </div>
+        <center>
+          <div class="row">
+            <%= f.submit "Register", class: "form-submit white-text waves-effect waves-light" %>
+          </div>
+        </center>
+      <% end %>
+    </div>
+  </div>
+</div>
+</div>
+</div>

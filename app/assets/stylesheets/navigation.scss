@@ -1,0 +1,99 @@
+/*Assuming header is a grid-item*/
+header {
+  grid-column: 1 / -1;
+  grid-row: 1 / 2;
+}
+
+header nav {
+  background: #211919 !important;
+  height: 100%;
+  line-height: 70px;
+}
+header nav ul{
+  font-weight:bold;
+}
+
+header .dropdown-content a{
+  color: #2c2e30;
+  font-weight: normal;
+}
+
+header .username{
+  font-size: 35px;
+  color: #b78b5f;
+  margin-left: 15px;
+}
+
+.nav-wrapper li {
+  transition: 0.3s !important;
+}
+
+.nav-wrapper a>i {
+  margin-right: 10px !important;
+}
+
+.nav-wrapper ul a:hover{
+  color: #967100;
+}
+
+header .account-link{
+  background-color: rgba(256, 256, 256, 0.05);
+}
+
+header .dashboard-trigger{
+  border-left: 1px solid rgba(256, 256, 256, 0.1)
+}
+
+header td {
+  padding: 10px;
+}
+
+#sidenav-trigger {
+  grid-row: 1/2;
+  height: 100%;
+  line-height: 80px;
+  position: absolute;
+  right: 0;
+  transform: translateX(200%);
+  color: white;
+  padding: 0 10px 0 10px;
+  background: transparent;
+  transition: 0.3s;
+  transition-delay: 0.4s;
+}
+
+#side-nav{
+  grid-row: 3 / -1;
+  grid-column: -3 / -1;
+  width: 100%; height: 100%;
+  background: #211919;
+  transform: translateX(100%);
+  z-index: 10;
+}
+
+#side-nav li {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  font-weight: bold;
+}
+
+#side-nav .dashboard-trigger{
+  border-top: 1px solid rgba(256, 256, 256, 0.1)
+}
+
+#side-nav a:hover{
+  color: #e38282;
+}
+
+.sidenav-account-dropdown{
+  left: 0 !important;
+}
+
+#side-nav .dropdown-content a{
+  color: black;
+  font-weight: normal;
+}
+#side-nav .dropdown-content a:hover{
+  color: #906c6c;
+}

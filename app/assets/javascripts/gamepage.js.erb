@@ -1,0 +1,607 @@
+var map;
+var marker;
+var territoryObj;
+var currentPos;
+var isCapturing = false;
+var playerPath;
+var lastknownCoordinates;
+var captureStep = 0;
+var testCircle;
+var isLoaded = false;
+var territories_in_view;
+var polygons_in_view = new Array();
+var isMapLoaded = false;
+var captureTimer;
+var isCaptureSuccessful;
+var time_format = '00:00';
+var score;
+var currentPathCoords = new Array();
+var mInterval;
+
+
+
+
+
+App.capture = App.cable.subscriptions.create("CaptureChannel",{
+  connected: function(){
+
+  },
+  disconnected: function(){
+
+  },
+  received: function(data){
+    if(data.territory.player_id != $('#id-container')['0'].innerHTML){
+      if(map && map.getBounds() && map.getBounds().contains(new google.maps.LatLng(data.territory.center_lat,data.territory.center_lng))){
+        var decodedCoords = google.maps.geometry.encoding.decodePath(data.territory.coords);
+        var foreignPoly = drawPolygon(decodedCoords,'rgba(61, 64, 68,0.8)');
+        registerPolygon(foreignPoly,{
+          id:data.territory.id,
+          player_id:data.territory.player_id,
+          time:data.territory.time,
+          area:data.territory.area,
+          index:polygons_in_view.length,
+          name:data.owner,
+          center:{lat:data.territory.center_lat,lng:data.territory.center_lng}
+        });
+      }
+    }
+  }
+});
+
+function createCaptureDialog(title,containerSelector,territory){
+  var area = google.maps.geometry.spherical.computeArea(territory.getPath());
+  var area_fixed = area.toFixed(2);
+
+  $(containerSelector).empty().html('<span>Area:'+area_fixed+' &#13217</span><span><br/>Time:'
+  +time_format+'</span><br/>Would you like to save this capture?');
+  $(containerSelector).dialog({
+    autoOpen:false,
+    modal:true,
+    width:'auto',
+    title:title,
+
+    buttons:[
+      {
+        text:'save',
+        click:function(){
+          createTerritory(territory,area,false);
+          score = (parseFloat(score) + parseFloat(area_fixed)).toFixed(2);
+          $(containerSelector).dialog('close');        }
+      },
+      {
+        text:'cancel',
+        click:function(){
+          territory.setMap(null);
+          onstopCapture();
+          $(containerSelector).dialog('close');
+        }
+      }
+    ]
+  });
+
+  $(containerSelector).dialog('open');
+  $('.ui-dialog > .ui-widget-header').css('background','rgba(209,180,64,0.8)');
+}
+
+function createErrorDialog(title,message,containerSelector){
+  $(containerSelector).text(message);
+  $(containerSelector).dialog({
+    autoOpen:false,
+    modal:true,
+    width:'auto',
+    title:title,
+    buttons:[
+      {
+        text:'alright',
+        click:function(){
+          $('#status-container').hide();
+          $(containerSelector).dialog('close');
+        }
+      }
+    ]
+  });
+  $(containerSelector).dialog('open');
+  $('.ui-dialog > .ui-widget-header').css('background','rgba(232, 48, 48,0.8)');
+
+}
+function createDetailsDialog(title,message,containerSelector,territory){
+  var headerColor = 'rgba(87, 187, 224, 0.8)';
+  var newTitle = title+' : Friendly';
+
+  var ratio = 0;
+  //division by zero exception
+  if(territory.time != 0){
+    ratio = parseFloat(territory.area) / parseInt(parseTime(territory.time));
+    ratio = ratio.toFixed(3);
+  }
+
+  $(containerSelector).empty();
+
+  $(containerSelector).html('<span>Owner: '+territory.name+'</span><br/><span>Area: '+territory.area
+  +' &#13217</span><br/><span>Time: '
+  +territory.time+'</span><br/><span>Ratio:'+ratio+' ATR</span>');
+  if(territory.player_id != $('#id-container')['0'].innerHTML){
+    headerColor = 'rgba(61, 64, 68,0.8)';
+    newTitle = title + ' : Enemy';
+  }
+  $(containerSelector).dialog({
+    autoOpen:false,
+    modal:true,
+    width:'auto',
+    title:newTitle,
+    buttons:[
+      {
+        text:'Alright',
+        click:function(){
+          $(containerSelector).dialog('close');
+        }
+      }
+    ]
+  });
+  $(containerSelector).dialog('open');
+  $('.ui-dialog > .ui-widget-header').css('background',headerColor);
+}
+function createInvasionDialog(mTerritory,eTerritory,time){
+  var title = 'Invasion Successfull!';
+  var color = 'rgba(58,60,63,0.8)';
+  var mode = 'invade';
+  var center_obj = getPolygonCenter(eTerritory);
+  var area = google.maps.geometry.spherical.computeArea(mTerritory.getPath());
+  var data = {
+    player_id: $('#id-container')['0'].innerHTML,
+    coords:google.maps.geometry.encoding.encodePath(mTerritory.getPath()),
+    time: time,
+    area: area,
+    name:$('#username-container')['0'].innerHTML,
+    center_lat: center_obj.lat,
+    center_lng: center_obj.lng
+  };
+  var url = '/territories/invade/'+eTerritory.id;
+
+  if(eTerritory.player_id == $('#id-container')['0'].innerHTML){
+    title = 'Expansion Successfull!';
+    color = 'rgba(216,190,75,0.8)';
+    mode = 'update';
+    url = '/territories/expand/';
+  }
+
+  $('#dialog-container').dialog({
+    autoOpen:false,
+    modal:true,
+    width:'auto',
+    title:title,
+    buttons:[
+      {
+        text:'No Its Ight.',
+        click:function(){
+          mTerritory.setMap(null);
+          $('#dialog-container').dialog('close');
+        }
+      },
+      {
+        text:'Destroy It!',
+        click:function(){
+          $.ajax({
+            method:'PUT',
+            url:url,
+            data:data,
+            success:function(mData){
+              $('#debug').empty().text('success invasion');
+              registerPolygon(mTerritory,mData);
+              polygons_in_view.splice(eTerritory.index,1);
+              eTerritory.setMap(null);
+              $('#dialog-container').dialog('close');
+            },
+            error:function(error){
+              $('#debug').empty().text('invasion '+error);
+            }
+          });
+        }
+      }
+    ]
+  });
+  $('#dialog-container').text('Congratulations! Would you like to proceed?');
+  $('#dialog-container').dialog('open');
+  $('.ui-dialog > .ui-widget-header').css('background',color);
+
+}
+function initMap(){
+  map = new google.maps.Map(document.getElementById('gamepage-map'), {
+    center: {lat: -34.397, lng: 150.644},
+    zoom: 18,
+    gestureHandling:'none',
+    scrollwheel:false,
+    zoomControl:false,
+    mapTypeControl: false,
+    scaleControl: false,
+    streetViewControl: false,
+    rotateControl: false,
+    fullscreenControl: false
+  });
+  $('#message-container').click(function(){
+    this.hide();
+  });
+
+  window.onerror = function(message,source,lineno,error){
+      $('#debug').append(error + ',' + message);
+      createErrorDialog('oops! looks like something went wrong. please make sure you have network connectivity and '+
+      'have location services enabled. please try again by refreshing the page','#dialog-container');
+  }
+}
+
+function isPolygonContained(path){
+  for(p in polygons_in_view){
+      for(var i=0;i<path.length;i++){
+        if(google.maps.geometry.poly.containsLocation(new google.maps.LatLng(path[i].lat,path[i].lng),
+        polygons_in_view[p])){
+          return true;
+        }
+      }
+  }
+  return false;
+}
+
+function isPolygonInside(territory){
+  var path = territory.getPath();
+
+  for(var i=0;i<polygons_in_view.length;i++){
+    var center_lat = polygons_in_view[i].center.lat;
+    var center_lng = polygons_in_view[i].center.lng;
+    if(google.maps.geometry.poly.containsLocation(new google.maps.LatLng(center_lat,center_lng),territory)){
+      return polygons_in_view[i];
+    }
+  }
+  return false;
+}
+
+function parseTime(timeFormat){
+  var split = timeFormat.split(':');
+  var minutes = split[0];
+  var seconds = split[1];
+
+  return parseInt((minutes*60))+parseInt((seconds));
+}
+
+
+function startCaptureTimer(){
+  var minutes = 0;
+  var seconds = 0;
+
+  var startDate = new Date();
+  var startTime = startDate.getTime();
+  var captureUI = document.getElementById('capture-UI');
+
+  $('#capture-UI').empty().text('capturing...');
+  $('#capture-UI').show();
+
+  captureTimer = setInterval(function(){
+    var currentDate = new Date();
+    var timeElapsed = currentDate.getTime() - startTime;
+    var newDate = new Date(timeElapsed);
+    var minutes_str = '00';
+    var seconds_str = '00';
+
+    seconds = newDate.getSeconds();
+    minutes = newDate.getMinutes();
+
+
+    minutes_str = minutes+'';
+    seconds_str = seconds+'';
+
+    if(minutes < 10){
+      minutes_str = '0'+minutes;
+    }
+    if(seconds < 10){
+      seconds_str = '0'+seconds;
+    }
+
+    time_format = minutes_str+":"+seconds_str;
+
+    $('#capture-UI').empty().text("capturing.."+time_format);
+  },1000);
+}
+
+
+function cleanPolygonsFromView(){
+  polygons_in_view.forEach(function(obj){
+    obj.poly.setMap(null);
+  });
+}
+
+function loadTerritoriesAndRenderToView(){
+  var map_bounds = map.getBounds();
+  var ln_r = map_bounds.getNorthEast().lng();
+  var lt_r = map_bounds.getNorthEast().lat();
+  var ln_l = map_bounds.getSouthWest().lng();
+  var lt_l = map_bounds.getSouthWest().lat();
+  $.ajax({
+    method:'GET',
+    url:'/territories/get/'+$('#id-container')['0'].innerText,
+    data:{
+      lng_right:ln_r,
+      lat_right:lt_r,
+      lng_left:ln_l,
+      lat_left:lt_l
+    },
+    success:function(data){
+      territories_in_view = data.territories;
+      score = data.score;
+      $('#score-UI').empty().html("CAPTURED: <span style='color:#28b0ff;'>"+score+
+      "</span> <span style='color:yellow;'>&#13217</span>");
+      if(territories_in_view||territories_in_view!=''){
+        for(p in territories_in_view){
+          var decoded_coords = google.maps.geometry.encoding.decodePath(territories_in_view[p].coords);
+          var color = '#5ed4ff';
+          if(territories_in_view[p].player_id != $('#id-container')['0'].innerText){
+            color = '#353230';
+          }
+          var poly = drawPolygon(decoded_coords,color);
+          var options = {
+            id:territories_in_view[p].id,
+            player_id:territories_in_view[p].player_id,
+            area:territories_in_view[p].area.toFixed(2),
+            time:territories_in_view[p].time,
+            index:polygons_in_view.length,
+            name:territories_in_view[p].username,
+            center:{lat:territories_in_view[p].center_lat,lng:territories_in_view[p].center_lng}
+          };
+          registerPolygon(poly,options);
+        }
+      }
+    }
+
+  });
+}
+
+function registerPolygon(polygon,options){
+  for(p in options){
+    polygon[p] = options[p];
+  }
+  polygon.addListener('click',function(){
+    createDetailsDialog('Capture Details','','#dialog-container',this);
+    testTerritory = this;
+  });
+  polygons_in_view.push(polygon);
+}
+
+function getPolygonCenter(poly){
+  var bounds = new google.maps.LatLngBounds();
+
+  var pathArray = poly.getPath().getArray();
+  for(i in pathArray){
+    bounds.extend(pathArray[i]);
+  }
+  return bounds.getCenter();
+}
+
+function createTerritory(poly,area,mode){
+  var center_ = getPolygonCenter(poly);
+  var center_obj = {'lat':center_.lat(),'lng':center_.lng()};
+  var area_fixed = area.toFixed(2);
+
+  var data = {
+    coords:google.maps.geometry.encoding.encodePath(poly.getPath()),
+    time:time_format,
+    area:area_fixed,
+    center_lat:center_obj.lat,
+    center_lng:center_obj.lng,
+    invade:mode
+  };
+  $.ajax({
+    method:'PUT',
+    url:'/players/achievement_create/'+$('#id-container')['0'].innerText,
+    data:data,
+    success:function(data){
+      var options = {
+        id:data.count,
+        player_id:$('#id-container')['0'].innerText,
+        time:time_format,
+        area:area_fixed,
+        index:polygons_in_view.length,
+        name:$('#username-container')['0'].innerHTML,
+        center:{lat:center_obj.lat,lng:center_obj.lng}
+      };
+      registerPolygon(poly,options);
+      $('#score-UI').empty().html("CAPTURED: <span style='color:#28b0ff;'>"+score+
+      "</span> <span style='color:yellow;'>&#13217</span>");
+    },
+    error:function(error){
+      $('#debug').empty().append(error);
+    }
+  });
+}
+
+function drawPolygon(coords,color){
+  var mTerritory = new google.maps.Polygon({
+    paths:coords,
+    strokeColor: '#FF0000',
+    fillColor: color,
+    fillOpacity: 0.35
+  });
+  mTerritory.setMap(map);
+  return mTerritory;
+}
+function successCallback(position) {
+
+    var latitude = position.coords.latitude;
+    var longitude = position.coords.longitude;
+
+    $('#status-container').hide();
+    if(isCapturing == false){
+      currentPos = {"lat":position.coords.latitude, "lng":position.coords.longitude};
+    }else{
+      if(captureStep == 0){
+        captureStep = 1;
+      }
+      //minimum propagation distance is reached, start checking if user has completed circuit
+      if(captureStep == 3){
+        var pos = new google.maps.LatLng(position.coords.latitude,position.coords.longitude);
+        var bounds = testCircle.getBounds();
+        //if circuit is complete
+        if(bounds.contains(pos) == true){
+          //create territory overlay when circuit is complete
+          var mTerritory= drawPolygon(territoryObj.coordinates,'#4286f4');
+          var path = territoryObj.coordinates;
+
+          var currentTime = time_format;
+          onstopCapture();
+          var isPolyContained = isPolygonContained(path);
+          var isPolyInside = isPolygonInside(mTerritory);
+          if(isPolyContained == true){
+            //cannot capture since territory intersects with another territory
+            createErrorDialog('Capture Failed!','Cannot capture territory because it intersects another one!',
+            '#dialog-container');
+            mTerritory.setMap(null);
+
+          }else if(isPolyInside != false){
+              //invasion
+              var area = google.maps.geometry.spherical.computeArea(mTerritory.getPath());
+              area = parseFloat(area);
+              area = area.toFixed(3);
+              var ratioToBeat = parseFloat(isPolyInside.area)/parseInt(parseTime(isPolyInside.time));
+              var mRatio = area/parseInt(parseTime(currentTime));
+              $('#debug').empty().append('currentArea: '+area+' currentTime: '+parseInt(parseTime(currentTime))+' ratioToBeat: '+ratioToBeat+' mRatio: '+mRatio);
+
+              if(mRatio >= ratioToBeat){
+                //invade/expand
+                createInvasionDialog(mTerritory,isPolyInside,currentTime);
+              }else{
+                var ratioDiff = ratioToBeat - mRatio;
+                //failed to invade expand
+                createErrorDialog('Invasion/Expansion Failed!','Nice try! unfortunately you were unable to beat the capture ratio by '+
+                  ratioDiff + 'ATR','#dialog-container');
+                mTerritory.setMap(null);
+              }
+          }else{
+              //simple capture
+              createCaptureDialog('capture details','#dialog-container',mTerritory);
+          }
+          lastknownCoordinates = {'lat':latitude,'lng':longitude};
+        }
+      }
+    }
+        //this helps us (sets up the mechanism) update the territory object coordinates every x meters
+        var flag;
+        if(lastknownCoordinates){
+          flag = lastknownCoordinates;
+        }else{
+          flag = currentPos;
+        }
+
+
+        if(currentDistance(flag.lat,flag.lng,latitude,longitude) >= 10){
+          //update territory object
+          territoryObj.coordinates.push({"lat":latitude, "lng":longitude});
+          playerPath.setPath(territoryObj.coordinates);
+          if(captureStep < 3){
+            captureStep++;
+          }
+          lastknownCoordinates = {'lat':latitude,'lng':longitude};
+        }
+    var cpos = new google.maps.LatLng(position.coords.latitude,position.coords.longitude);
+    if(isLoaded == false || !(map.getBounds().contains(cpos))){
+      map.setCenter(cpos);
+      if(isLoaded == true && map.getBounds()){
+        cleanPolygonsFromView();
+        loadTerritoriesAndRenderToView();
+      }
+    }
+
+    if(isLoaded == false && map.getBounds()){
+      loadTerritoriesAndRenderToView();
+      isLoaded = true;
+    }
+
+    var playerMarker = {url:"<%=asset_url('player_nav.png')%>",scaledSize:new google.maps.Size(50,50),
+      anchor:new google.maps.Point(25,25)};
+    if(marker){
+      marker.setPosition({lat:position.coords.latitude,lng:position.coords.longitude});
+    }else{
+      marker = new google.maps.Marker({
+        position:{lat:position.coords.latitude,lng:position.coords.longitude},
+        icon:playerMarker,
+        map:map
+      });
+    }
+    isMapLoaded = true;
+}
+
+function errorCallBack(error){
+  if(error){
+    createErrorDialog("Location Error","oops! is your location enabled?"+
+    "Please enable your location and refresh the page to proceed.",
+    '#dialog-container');
+  }
+}
+
+var watchId = navigator.geolocation.watchPosition(successCallback,errorCallBack,
+  {enableHighAccuracy:true,timeout:60000,maximumAge:0});
+
+
+function onStartCapture(){
+  time_format = '00:00';
+  if(isPolygonContained([currentPos])){
+    createErrorDialog('start capture failed!','oops! cannot start capture because you are located inside another territory!',
+  '#dialog-container');
+
+  }else if(isCapturing == false && isMapLoaded == true){
+    //create radius to detect when player completes the circuit
+    var circlePos = currentPos;
+    testCircle = new google.maps.Circle({
+      strokeColor: '#FF0000',
+      strokeOpacity: 0.8,
+      strokeWeight: 2,
+      fillColor: '#FF0000',
+      fillOpacity: 0.35,
+      map: map,
+      center: circlePos,
+      radius: 10
+    });
+
+    startCaptureTimer();
+
+    territoryObj = {"coordinates":new Array()};
+    territoryObj.coordinates.push(currentPos);
+    currentPathCoords.push(currentPos);
+    isCapturing = true;
+
+    var dashedSymbol = {
+      path: google.maps.SymbolPath.CIRCLE,
+      fillOpacity: 0.5,
+      scale: 5
+    };
+    playerPath = new google.maps.Polyline({
+      path:territoryObj.coordinates,
+      strokeColor:'#FF0000',
+      fillOpacity:0,
+      icons:[{
+        icon:dashedSymbol,
+        offset:'5',
+        repeat:'10px'
+      }],
+      strokeOpacity:0.5
+    });
+    playerPath.setMap(map);
+  }
+}
+function onstopCapture(){
+
+  if(playerPath){
+    playerPath.setMap(null);
+    territoryObj.coordinates = new Array();
+  }
+  if(testCircle){
+    testCircle.setMap(null);
+  }
+  captureStep = 0;
+  isCapturing = false;
+  lastknownCoordinates = null;
+  $('#capture-UI').hide();
+  clearInterval(captureTimer);
+}
+
+function currentDistance(x1,y1,x2,y2){
+  var coordinate1 = new google.maps.LatLng(x1,y1);
+  var coordinate2 = new google.maps.LatLng(x2,y2);
+  return google.maps.geometry.spherical.computeDistanceBetween(coordinate1,coordinate2);
+}
